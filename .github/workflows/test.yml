@@ -1,0 +1,94 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fastapi_boilerplate_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.7.1
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-root
+
+    - name: Create .env file for testing
+      run: |
+        cat > .env << EOF
+        ACCPTED_=["*"]
+        DB_USER=postgres
+        DB_PASSWORD=postgres
+        DB_HOST=localhost
+        DB_PORT=5432
+        DB_NAME=fastapi_boilerplate_test
+        SECRET_KEY=test-secret-key-for-github-actions-only-not-for-production
+        SMTP_HOST=
+        SMTP_PORT=
+        SMTP_USER=
+        SMTP_PASSWORD=
+        SMTP_FROM=
+        AWS_ACCESS_KEY=
+        AWS_SECRET_KEY=
+        AWS_BUCKET_NAME=
+        EOF
+
+    - name: Create storage directories
+      run: |
+        mkdir -p storage/public storage/private
+        touch storage/public/.gitkeep storage/private/.gitkeep
+
+    - name: Run database migrations
+      run: poetry run alembic upgrade head
+
+    - name: Run tests
+      run: poetry run pytest -v
+
+    - name: Test summary
+      if: always()
+      run: |
+        if [ $? -eq 0 ]; then
+          echo "✅ All tests passed successfully!"
+        else
+          echo "❌ Some tests failed. Please check the logs above."
+          exit 1
+        fi
