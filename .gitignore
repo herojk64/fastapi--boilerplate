@@ -1,0 +1,89 @@
+# ------------------------
+# Python
+# ------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg
+*.log
+
+# Virtual environments
+env/
+venv/
+ENV/
+.venv/
+.python-version
+
+# Byte-compiled / optimized / DLL files
+*.so
+*.dll
+*.dylib
+
+# ------------------------
+# FastAPI / Uvicorn
+# ------------------------
+*.sqlite
+instance/
+*.db
+
+# ------------------------
+# Alembic
+# ------------------------
+alembic.ini
+database/migrations/versions/*.pyc
+
+# Alembic cache
+database/migrations/__pycache__/
+
+# ------------------------
+# Poetry
+# ------------------------
+# Keep poetry.lock for reproducible builds
+# poetry.lock is tracked for Docker builds
+
+# ------------------------
+# Docker
+# ------------------------
+# Volumes and build artifacts
+postgres_data/
+postgres_dev_data/
+
+# ------------------------
+# Editors
+# ------------------------
+.vscode/
+.idea/
+
+# ------------------------
+# Logs and runtime data
+# ------------------------
+*.log
+*.pid
+*.cache
+
+# ------------------------
+# OS
+# ------------------------
+.DS_Store
+Thumbs.db
+
+# ------------------------
+# Local config / secrets
+# ------------------------
+.env
+*.secret
+configs/*.pyc
+
+# ------------------------
+# Uploads (Your storage folder)
+# ------------------------
+storage/public/*
+storage/private/*
+
+# But keep the folder
+!storage/public/.gitkeep
+!storage/private/.gitkeep
+
