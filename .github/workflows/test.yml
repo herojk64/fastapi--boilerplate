@@ -56,9 +56,10 @@ jobs:
       run: |
         cat > .env << EOF
         ACCPTED_=["*"]
+        DB_TYPE=postgres
         DB_USER=postgres
         DB_PASSWORD=postgres
-        DB_HOST=localhost
+        DB_HOST=127.0.0.1
         DB_PORT=5432
         DB_NAME=fastapi_boilerplate_test
         SECRET_KEY=test-secret-key-for-github-actions-only-not-for-production
@@ -76,6 +77,24 @@ jobs:
       run: |
         mkdir -p storage/public storage/private
         touch storage/public/.gitkeep storage/private/.gitkeep
+
+    - name: Wait for Postgres to be ready
+      run: |
+        python - <<'PY'
+        import socket, time, sys
+        host='127.0.0.1'
+        port=5432
+        for _ in range(60):
+            try:
+                s=socket.create_connection((host,port),2)
+                s.close()
+                print('Postgres reachable')
+                sys.exit(0)
+            except Exception:
+                time.sleep(1)
+        print('Postgres not reachable after timeout')
+        sys.exit(1)
+        PY
 
     - name: Run database migrations
       run: poetry run alembic upgrade head
