@@ -99,9 +99,6 @@ jobs:
         sys.exit(1)
         PY
 
-    - name: Run database migrations
-      run: poetry run alembic upgrade head
-
     - name: Run tests
       run: poetry run pytest -v
 
